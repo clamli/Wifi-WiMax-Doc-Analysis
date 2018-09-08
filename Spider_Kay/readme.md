@@ -8,10 +8,10 @@ file: grouper_1990to1996.csv and grouper_1997to2000.csv
 file:80216_mentor_1to21.csv, crawled from totally 21 pages.
 
 ## Command line
-# open terminal and use Scrapy
+### open terminal and use Scrapy
 scrapy crawl mentor -o 80211_mentor_1to573.csv
-# change the start_urls to 802.16 websiet in spiders1.py
+### change the start_urls to 802.16 websiet in spiders1.py
 scrapy crawl mentor -o 80211_mentor_1to22.csv
-# then use grouper Spider
+### then use grouper Spider
 scrapy crawl grouperNew -o grouper_1990to1996.csv
 scrapy crawl grouper2 -o grouper_1997to2000.csv
