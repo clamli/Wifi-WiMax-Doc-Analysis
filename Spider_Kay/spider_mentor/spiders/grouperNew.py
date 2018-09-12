@@ -1,7 +1,17 @@
 # -*- coding: utf-8 -*-
 import scrapy, re
 
-
+'''
+data description:
+author attribute:
+1. null Void means no b_data_row
+2. (Mike Trompower - Aironet)
+   (Vic Hayes, Lucent Technologies, Chair)
+  (Vic Hayes, Chair, Lucent Technologies)
+  (Simon Black, Symbionics)
+3. those line has no author-company info but has the title
+  we need to indentify them
+'''
 class GroupernewSpider(scrapy.Spider):
     #this code is to crawl down table information during 1990-1996
     name = 'grouperNew'

@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
+#author: zhenkai wang
+#date: 2018 Sept 08
 import scrapy, re
 
 
 class Grouper2Spider(scrapy.Spider):
-    #this code is to crawl down table information during 1990-1996
+    #this code is to crawl down table information during 1990-1996 in grouper website
+    #this version did not crawl down the doc files.
     name = 'grouper2'
     allowed_domains = ['grouper.ieee.org']
     start_urls = ['http://grouper.ieee.org/groups/802/11/Documents/DocumentArchives/']
