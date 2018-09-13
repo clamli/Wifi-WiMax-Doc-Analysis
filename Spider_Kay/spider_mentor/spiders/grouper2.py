@@ -2,9 +2,11 @@
 #author: zhenkai wang
 #date: 2018 Sept 08
 import scrapy, re
+import sys
+sys.path.append("..\spiders")
+from abstractGrouper import GrouperAPI
 
-
-class Grouper2Spider(scrapy.Spider):
+class Grouper2Spider(GrouperAPI):
     #this code is to crawl down table information during 1990-1996 in grouper website
     #this version did not crawl down the doc files.
     name = 'grouper2'
@@ -59,24 +61,24 @@ class Grouper2Spider(scrapy.Spider):
         yield {'Year':'Year', 'DCN':'DCN', 'Rev':'Rev', 'SubGroup':'SubGroup', 'Title':'Title', 'Pdf':'Pdf', 'CurrPage':'CurrPage'}
         for url in allTablesUrls[7:]:#these tables are in the same type
             yield scrapy.Request(url, callback = self.parse_table)
-
-    def getRow(self, row, idx):
-        #if the content is '\xa0' means that it is empty record, we need to replace it into null
-        result = row.xpath('./td[' + str(idx) + ']/text()')
-        if (result):
-            return [("null" if ((len(re.findall(r'\xa0', value)) >0)) else value) for value in result.extract()]
-        else:
-            return "null"
-    def getUrl(self, rows, idx, response):
-        rawData = rows.xpath('./td[' + str(idx) + ']')
-        if len(rawData) == 0:
-            return "null"
-        result = []
-        for row in rawData.extract():
-            p1 = r'href=\"(.*)\"'
-            searchResult = re.findall(p1, row)
-            if (searchResult):
-                result.append(response.urljoin(searchResult[0]))
-            else:
-                result.append("null")
-        return result
+#
+#    def getRow(self, row, idx):
+#        #if the content is '\xa0' means that it is empty record, we need to replace it into null
+#        result = row.xpath('./td[' + str(idx) + ']/text()')
+#        if (result):
+#            return [("null" if ((len(re.findall(r'\xa0', value)) >0)) else value) for value in result.extract()]
+#        else:
+#            return "null"
+#    def getUrl(self, rows, idx, response):
+#        rawData = rows.xpath('./td[' + str(idx) + ']')
+#        if len(rawData) == 0:
+#            return "null"
+#        result = []
+#        for row in rawData.extract():
+#            p1 = r'href=\"(.*)\"'
+#            searchResult = re.findall(p1, row)
+#            if (searchResult):
+#                result.append(response.urljoin(searchResult[0]))
+#            else:
+#                result.append("null")
+#        return result
