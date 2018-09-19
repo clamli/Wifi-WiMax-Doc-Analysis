@@ -132,6 +132,7 @@ def getContent(textPath):
 
     wordsFiltered = words
     return wordsFiltered
+
 def wordListToFreqDict(wordList):
     wordFreq = [wordList.count(p) for p in wordList]
     return dict(zip(wordList, wordFreq))
@@ -148,9 +149,20 @@ def getFreqDict(filePath, listOfTechTerms):
 def getAllFiles(dirPath):
 #    print(os.listdir(dirPath))
     files = [os.path.join(dirPath, f) for f in os.listdir(dirPath)]
-    print("total number of files under directory: ", len(files))
-    files = filter(lambda f: f.endswith(('.pdf', '. PDF')), files)
-    return list(files)
+    
+    files = list(filter(lambda f: f.endswith(('.pdf', '. PDF')), files))
+    print("total number of pdf files under directory: ", len(files))
+    goodFiles = []
+    for file in files:
+        try:
+            with open(file, "rb") as f:
+                a = f.readlines()
+        except:
+            pass
+        else:
+            goodFiles.append(file)
+    print("good file num: ",len(goodFiles))
+    return (goodFiles)
 
 def getAllDicts(files, listOfTechTerms, numFile):
     
@@ -220,7 +232,7 @@ if __name__ == "__main__":
     listOfTechTerms = getListOfTechTerms(techTermPath1, techTermPath4)#here it can take as much doc as possible
     dictAbb = getDictOfAbb(techTermPath2, techTermPath3)
     #get all the files
-    numFile = 200
+    numFile = 5300
     minCount = 5
     fileNames = getAllFiles(pdfDir);
     listOfWords = getAllLists(fileNames, listOfTechTerms, dictAbb, numFile)
@@ -232,6 +244,7 @@ if __name__ == "__main__":
     featureName = vec.get_feature_names()
 #    print(wordFreqArray)
 #    print(featureName)
+    pickle.dump(fileNames, open("fileNames.dat", "wb"))
     pickle.dump(wordFreqArray, open("wordFreqArray.dat", "wb"))
     pickle.dump(featureName, open("featureName.dat", "wb"))
     
