@@ -36,7 +36,7 @@ def extract_name(column):
 
 def extract_name2(column):
 
-    p4Title =  r'^([^\(\)]+)'
+    p4Title =  r'^(.+)\('
     p4AuthorCompany = r'\((.+)\)'
     titles = []
     authorCompanies = []
@@ -44,7 +44,8 @@ def extract_name2(column):
     companies = []
     for value in column:
         title = re.findall(p4Title, value)
-        if (title):
+        if (len(title) > 0):
+            print(title)
             titles.append(title[0])
         else:
             titles.append("null")
@@ -59,6 +60,7 @@ def extract_name2(column):
         else:
             companies.append("no company")
             authors.append("no name")
+    print(titles)
     return authors, companies, titles
     
 def process1(value):
@@ -123,28 +125,29 @@ def parse_file(path, keyColumnIdx, savePath, downloadColumnIdx, titleColumnIdx, 
             downloads.append(row[downloadColumnIdx])
             titles.append(row[titleColumnIdx])
             
-        if (titles):
+        if (titleColumnIdx >= 0):
             authors, companies , _ = extractFunc(author_companies)
         else:
             authors, companies , titles = extractFunc(author_companies)
+
     with open(savePath, "w", newline="") as csvFile:
         csvWriter = csv.writer(csvFile, delimiter = ',',quoting = csv.QUOTE_MINIMAL)
-        csvWriter.writerow(["author", "company", "download", "title", "before parsing"])
+        csvWriter.writerow(["Author", "Company", "Download", "Title", "Before parsing"])
         for i in range(len(authors)):
             csvWriter.writerow([authors[i], companies[i], downloads[i], titles[i], author_companies[i]])
         
                 
 
 if __name__ == "__main__":
-    file1 = "..\80211_mentor_1to573.csv"
-    columnIdx1 = 6
-    savePath1 = "80211_mentor_1to573_author_info.csv"
-    file2= "..\80216_mentor_1to21.csv"
-    columnIdx2 = 6
-    savePath2 = "80216_mentor_1to21_author_info.csv"
+#    file1 = "..\80211_mentor_1to573.csv"
+#    columnIdx1 = 6
+#    savePath1 = "80211_mentor_1to573_author_info.csv"
+#    file2= "..\80216_mentor_1to21.csv"
+#    columnIdx2 = 6
+#    savePath2 = "80216_mentor_1to21_author_info.csv"
     file3 = "..\grouper_1990to1996.csv"
     columnIdx3 = 3
     savePath3 = "grouper_1990to1996_author_info.csv"
-    parse_file(file1, columnIdx1, savePath1, 8, 5)#1919 missing companies, no missing authors
-    parse_file(file2, columnIdx2, savePath2, 8, 5)#147 missing companies, no mising authors
+#    parse_file(file1, columnIdx1, savePath1, 8, 5)#1919 missing companies, no missing authors
+#    parse_file(file2, columnIdx2, savePath2, 8, 5)#147 missing companies, no mising authors
     parse_file(file3, columnIdx3, savePath3, 5, -1, extract_name2)
