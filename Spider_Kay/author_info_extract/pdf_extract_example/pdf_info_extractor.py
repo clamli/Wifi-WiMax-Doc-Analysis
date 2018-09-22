@@ -1,4 +1,5 @@
 import fitz
+
 from nltk import word_tokenize, pos_tag, ne_chunk
 def getContent(path):
     doc = fitz.open(path)

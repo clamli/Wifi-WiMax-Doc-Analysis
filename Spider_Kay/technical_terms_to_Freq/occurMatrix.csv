@@ -1,0 +1,196 @@
+3,0,302,base station,IEEE
+11,0,492,quadrature phase-shift keying,IEEE
+4,0,309,channel,IEEE
+0,0,0,IEEE,IEEE
+1,0,373,IEEE 802.16,IEEE
+10,0,276,orthogonal frequency division multiple access,IEEE
+6,0,232,document,IEEE
+5,0,107,copyright,IEEE
+12,0,239,standard,IEEE
+8,0,107,electronic,IEEE
+13,0,173,technology,IEEE
+2,0,107,application,IEEE
+7,0,319,downlink,IEEE
+9,0,424,information element,IEEE
+3,1,51,base station,IEEE 802.16
+11,1,51,quadrature phase-shift keying,IEEE 802.16
+4,1,48,channel,IEEE 802.16
+0,1,373,IEEE,IEEE 802.16
+1,1,0,IEEE 802.16,IEEE 802.16
+10,1,24,orthogonal frequency division multiple access,IEEE 802.16
+6,1,31,document,IEEE 802.16
+5,1,15,copyright,IEEE 802.16
+12,1,31,standard,IEEE 802.16
+8,1,15,electronic,IEEE 802.16
+13,1,23,technology,IEEE 802.16
+2,1,15,application,IEEE 802.16
+7,1,43,downlink,IEEE 802.16
+9,1,65,information element,IEEE 802.16
+3,2,13,base station,application
+11,2,24,quadrature phase-shift keying,application
+4,2,11,channel,application
+0,2,107,IEEE,application
+1,2,15,IEEE 802.16,application
+10,2,16,orthogonal frequency division multiple access,application
+6,2,11,document,application
+5,2,5,copyright,application
+12,2,11,standard,application
+8,2,5,electronic,application
+13,2,8,technology,application
+2,2,0,application,application
+7,2,13,downlink,application
+9,2,15,information element,application
+0,3,302,IEEE,base station
+1,3,51,IEEE 802.16,base station
+10,3,30,orthogonal frequency division multiple access,base station
+6,3,31,document,base station
+5,3,13,copyright,base station
+12,3,27,standard,base station
+8,3,13,electronic,base station
+13,3,20,technology,base station
+2,3,13,application,base station
+7,3,24,downlink,base station
+9,3,29,information element,base station
+3,3,0,base station,base station
+11,3,114,quadrature phase-shift keying,base station
+4,3,32,channel,base station
+0,4,309,IEEE,channel
+1,4,48,IEEE 802.16,channel
+10,4,12,orthogonal frequency division multiple access,channel
+6,4,24,document,channel
+5,4,11,copyright,channel
+12,4,31,standard,channel
+8,4,11,electronic,channel
+13,4,21,technology,channel
+2,4,11,application,channel
+7,4,60,downlink,channel
+9,4,98,information element,channel
+3,4,32,base station,channel
+11,4,63,quadrature phase-shift keying,channel
+4,4,0,channel,channel
+3,5,13,base station,copyright
+11,5,24,quadrature phase-shift keying,copyright
+4,5,11,channel,copyright
+0,5,107,IEEE,copyright
+1,5,15,IEEE 802.16,copyright
+10,5,16,orthogonal frequency division multiple access,copyright
+6,5,11,document,copyright
+5,5,0,copyright,copyright
+12,5,11,standard,copyright
+8,5,5,electronic,copyright
+13,5,8,technology,copyright
+2,5,5,application,copyright
+7,5,13,downlink,copyright
+9,5,15,information element,copyright
+3,6,31,base station,document
+11,6,66,quadrature phase-shift keying,document
+4,6,24,channel,document
+0,6,232,IEEE,document
+1,6,31,IEEE 802.16,document
+10,6,38,orthogonal frequency division multiple access,document
+6,6,0,document,document
+5,6,11,copyright,document
+12,6,25,standard,document
+8,6,11,electronic,document
+13,6,18,technology,document
+2,6,11,application,document
+7,6,28,downlink,document
+9,6,31,information element,document
+3,7,24,base station,downlink
+11,7,57,quadrature phase-shift keying,downlink
+4,7,60,channel,downlink
+0,7,319,IEEE,downlink
+1,7,43,IEEE 802.16,downlink
+10,7,32,orthogonal frequency division multiple access,downlink
+6,7,28,document,downlink
+5,7,13,copyright,downlink
+12,7,35,standard,downlink
+8,7,13,electronic,downlink
+13,7,24,technology,downlink
+2,7,13,application,downlink
+7,7,0,downlink,downlink
+9,7,90,information element,downlink
+3,8,13,base station,electronic
+11,8,24,quadrature phase-shift keying,electronic
+4,8,11,channel,electronic
+0,8,107,IEEE,electronic
+1,8,15,IEEE 802.16,electronic
+10,8,16,orthogonal frequency division multiple access,electronic
+6,8,11,document,electronic
+5,8,5,copyright,electronic
+12,8,11,standard,electronic
+8,8,0,electronic,electronic
+13,8,8,technology,electronic
+2,8,5,application,electronic
+7,8,13,downlink,electronic
+9,8,15,information element,electronic
+3,9,29,base station,information element
+11,9,54,quadrature phase-shift keying,information element
+4,9,98,channel,information element
+0,9,424,IEEE,information element
+1,9,65,IEEE 802.16,information element
+10,9,22,orthogonal frequency division multiple access,information element
+6,9,31,document,information element
+5,9,15,copyright,information element
+12,9,45,standard,information element
+8,9,15,electronic,information element
+13,9,30,technology,information element
+2,9,15,application,information element
+7,9,90,downlink,information element
+9,9,0,information element,information element
+3,10,30,base station,orthogonal frequency division multiple access
+11,10,108,quadrature phase-shift keying,orthogonal frequency division multiple access
+4,10,12,channel,orthogonal frequency division multiple access
+0,10,276,IEEE,orthogonal frequency division multiple access
+1,10,24,IEEE 802.16,orthogonal frequency division multiple access
+10,10,0,orthogonal frequency division multiple access,orthogonal frequency division multiple access
+6,10,38,document,orthogonal frequency division multiple access
+5,10,16,copyright,orthogonal frequency division multiple access
+12,10,44,standard,orthogonal frequency division multiple access
+8,10,16,electronic,orthogonal frequency division multiple access
+13,10,30,technology,orthogonal frequency division multiple access
+2,10,16,application,orthogonal frequency division multiple access
+7,10,32,downlink,orthogonal frequency division multiple access
+9,10,22,information element,orthogonal frequency division multiple access
+0,11,492,IEEE,quadrature phase-shift keying
+1,11,51,IEEE 802.16,quadrature phase-shift keying
+10,11,108,orthogonal frequency division multiple access,quadrature phase-shift keying
+6,11,66,document,quadrature phase-shift keying
+5,11,24,copyright,quadrature phase-shift keying
+12,11,66,standard,quadrature phase-shift keying
+8,11,24,electronic,quadrature phase-shift keying
+13,11,45,technology,quadrature phase-shift keying
+2,11,24,application,quadrature phase-shift keying
+7,11,57,downlink,quadrature phase-shift keying
+9,11,54,information element,quadrature phase-shift keying
+3,11,114,base station,quadrature phase-shift keying
+11,11,0,quadrature phase-shift keying,quadrature phase-shift keying
+4,11,63,channel,quadrature phase-shift keying
+3,12,27,base station,standard
+11,12,66,quadrature phase-shift keying,standard
+4,12,31,channel,standard
+0,12,239,IEEE,standard
+1,12,31,IEEE 802.16,standard
+10,12,44,orthogonal frequency division multiple access,standard
+6,12,25,document,standard
+5,12,11,copyright,standard
+12,12,0,standard,standard
+8,12,11,electronic,standard
+13,12,20,technology,standard
+2,12,11,application,standard
+7,12,35,downlink,standard
+9,12,45,information element,standard
+3,13,20,base station,technology
+11,13,45,quadrature phase-shift keying,technology
+4,13,21,channel,technology
+0,13,173,IEEE,technology
+1,13,23,IEEE 802.16,technology
+10,13,30,orthogonal frequency division multiple access,technology
+6,13,18,document,technology
+5,13,8,copyright,technology
+12,13,20,standard,technology
+8,13,8,electronic,technology
+13,13,0,technology,technology
+2,13,8,application,technology
+7,13,24,downlink,technology
+9,13,30,information element,technology
