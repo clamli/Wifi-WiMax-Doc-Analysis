@@ -81,11 +81,16 @@ def getAllFiles(dirPath, storeName = "allFileName.dat"):
 def getSelectedFileNames(pdfDir, start, end, storeName = "randomIdx.dat"):
     fileNames = getAllFiles(pdfDir);
     try:
-        with open(storeName, "r") as f:
+        with open(storeName, "rb") as f:
+            
             fileIdxWanted = pickle.load(f)
+        print("loading previous ", storeName, " success")
+            
     except:
+        print("loading new ", storeName, " success")
         fileIdxWanted = random.sample(range(len(fileNames)), len(fileNames))
         pickle.dump(fileIdxWanted, open(storeName, "wb"))
+        #if want to change the randomIdx, then delete the comment
     selectedFiles = []
     for idx in fileIdxWanted:
         selectedFiles.append(fileNames[idx])

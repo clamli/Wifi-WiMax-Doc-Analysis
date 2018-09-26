@@ -20,17 +20,31 @@ from sklearn import feature_extraction
 from sklearn.feature_extraction.text import TfidfTransformer  
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import HashingVectorizer 
-import pickle
+import pickle, json
 
 
 if __name__ == "__main__":
  
-
-    listOfWordLists = pickle.load(open("listOfWordLists.dat", "rb"))
+#    filePath = "listOfWordLists.dat"
+#    fileNames = pickle.load(open(fileNamesPath, "rb"))  
+    wordListsPath = "Abbreviation_from_files.dat"
+#    wordListsPath = "Abbreviation_from_files_1000.dat"
+#    wordListsPath = "Abbreviation_from_files_All.dat"
+#    fileNamesPath = "computedFiles.dat"
+    listOfWordListsDict = pickle.load(open(wordListsPath, "rb"))
+    listOfWordLists = []
+    fileNames = []
+    
+    for file, wordList in listOfWordListsDict.items():
+#        print(wordList)
+        listOfWordLists.append(wordList)
+        fileNames.append(file)
     print("num of docs:", len(listOfWordLists))
-    minCount = 5;
+    minCount = int(len(fileNames) / 100);
+    print("minCount", minCount)
     vectorizer = CountVectorizer(min_df = minCount,tokenizer=lambda doc: doc, lowercase=False)
     X= vectorizer.fit_transform(listOfWordLists)
+    print(X.shape)
 
 #    X = vectorizer.fit_transform(corpus)
     analyze = vectorizer.build_analyzer()
@@ -44,7 +58,8 @@ if __name__ == "__main__":
     import lda
     import lda.datasets
     numTopic = 10
-    model = lda.LDA(n_topics= numTopic, n_iter=500, random_state=1)
+    numIter = 2000
+    model = lda.LDA(n_topics= numTopic, n_iter= numIter, random_state=1)
     model.fit(np.asarray(weight))     # model.fit_transform(X) is also available
     topic_word = model.topic_word_    # model.components_ also works
  
@@ -52,28 +67,47 @@ if __name__ == "__main__":
     doc_topic = model.doc_topic_
 #    print("type(doc_topic): {}".format(type(doc_topic)))
     print("shape: {}".format(doc_topic.shape))
-    fileNames = pickle.load(open("fileNames.dat", "rb"))   
-    print("file num", len(fileNames))
+ 
+#    print("file num", len(fileNames))
 
  
     #输出前10篇文章最可能的Topic
-    label = []      
+    labels = []      
     for n in range(len(listOfWordLists)):
         topic_most_pr = doc_topic[n].argmax()
-        label.append(topic_most_pr)
+        labels.append(topic_most_pr)
 #        print("doc: {},topic: {}".format(n, topic_most_pr))
     
     #count label distribution
     labelMap = {}
-    for item in label:
+    for item in labels:
         labelMap[item] = labelMap.get(item, 0) + 1
     print("stats of topics amony documents:")
     print(labelMap)
     # one result: {1: 176, 4: 104, 2: 55, 0: 93, 3: 70}
     #write the label to file
-    with open("label.txt", "w" ) as f:
-        for item in label:
-            f.write("%s\n" % item)
+    prefix = str(X.shape[0]) + "file_" + str(X.shape[1]) + "word_" + str(minCount) + "mindf_" + str(numTopic) + "topic_" + str(numIter) + "iter_"
+    with open(prefix + "model.dat", "wb" ) as f:
+        pickle.dump(model, f)
+    with open(prefix + "labels.txt", "w" ) as f:
+        for i in range(len(labels)):
+            item = labels[i]
+            file = fileNames[i]
+            f.write("%s\t:%s\n" %(file, item))
+    #write down a dictionary, whose key is the topic index, value is the list of files 
+    #classified into this topic
+    with open(prefix + "labels2.txt", "w") as f:
+        tempDict = {}
+        for i in range(numTopic):
+            tempDict[i] = []
+        for i in range(len(labels)):
+            item = labels[i]
+            file = fileNames[i]
+            tempDict[item].append(file)
+        json.dump(tempDict, f)
+        f.write("\n")
+        for k, v in labelMap.items():
+            f.write(str(k) + "\t" + str(v) + "\n")
     #match the label to document name
     
     
@@ -93,10 +127,19 @@ if __name__ == "__main__":
 #    plt.show() 
     
     #show the top words in each topic    
-    featureName = pickle.load(open("featureName.dat", "rb"))
-    for i, topic_dist in enumerate(topic_word):
-        topic_words = np.array(featureName)[np.argsort(topic_dist)][:-(numTopic+1):-1]
-        print('*Topic {}\n- {}'.format(i, ','.join(topic_words)))
-
+#    featureName = pickle.load(open("featureName.dat", "rb"))
+    vocabulary = vectorizer.vocabulary_;
+    tempDict = {};
+    for word, idx in vocabulary.items():
+        tempDict[idx] = word
+    featureNames = []
+    for i in range(len(tempDict)):
+        featureNames.append(tempDict[i])
+#    print(featureNames)
+    with open(prefix + "topic_word.txt", "w") as f:
+        for i, topic_dist in enumerate(topic_word):
+            topic_words = np.array(featureNames)[np.argsort(topic_dist)][:-(numTopic+5):-1]
+            f.write('*Topic {}\n- {}\n'.format(i, ','.join(topic_words)))
+    
 
 
