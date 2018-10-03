@@ -15,12 +15,14 @@ import string
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_extraction.text import CountVectorizer
 from functools import partial
-numCount = 0
-path1 = "F:\\WireLessNLPGRA\\code\\NamedEntityRecognition\\some_proposal\\C802162a-01_01.pdf"
-path2 = "F:\\WireLessNLPGRA\\code\\NamedEntityRecognition\\some_proposal\\C802162a-01_06.pdf"
+
+#path1 = "F:\\WireLessNLPGRA\\code\\NamedEntityRecognition\\some_proposal\\C802162a-01_01.pdf"
+#path2 = "F:\\WireLessNLPGRA\\code\\NamedEntityRecognition\\some_proposal\\C802162a-01_06.pdf"
 techTermPath = "words"
+abbListPath = "Abbreviation_from_files_1000_by.dat"
 dictPath = "dict"
 pdfDir =  "F:\\WireLessNLPGRA\\80216CompProj"#change this to the pdf folders
+numCount = 0
 from fileProcessing import *
 from techTermProcessing import *
 
@@ -60,59 +62,78 @@ def transform(word):
         word = word.lower()
     return word
 
-def getTechTerms(words, listOfTechTerm):
+def getTechTerms(words, oneGram, twoGram, threeGram, extractedAbb, abbSet, pattern = "AB"):
 # =============================================================================
 #     #given a list of words from a doc, and a list of tecnical terms, find all occurance of technical word
 # =============================================================================
-    p1Match = r'^([A-Z]{2,})$'
-    p2Contain = r'802'
-
+#    p1Match = r'^([A-Z]{2,})$'
+#    p2Contain = r'802'
+    print("pattern\t", pattern)
     result = []
     wordNum = len(words)
-    for i in range(wordNum):
-        word = words[i]
-#        word = transform(word)
-        #if (word in listOfTechTerm):#since they are all lowercase in listOfTechTerm
-        #    result.append(word)
-        isTerm = False
-        for term in listOfTechTerm:
-            #correct match
-            if word == term:
-                isTerm = True
-            splited_terms = term.split()
+    if ("tech" in pattern):        
+        for i in range(wordNum):
+            word = words[i]
 
-            if len(splited_terms) > 1:
-                isEqual = True
-                for idx in range(len(splited_terms)):
-                    if (i + idx > wordNum - 1):
-                        break
-                    if (words[i + idx] != splited_terms[idx]):
-                        isEqual = False
-                if (isEqual):
-                    result.append(term)
+            #oneGram
+            if (word in oneGram):
+                result.append(word)                
+            #twoGram
+            if (word in twoGram and i < wordNum - 1 and (word + " " + words[i + 1]) == twoGram[word]):
+                result.append(twoGram[word])               
+                    
+            #threeGram
+            if (word in threeGram and i < wordNum - 2 and (word + " " + words[i + 1] + " " + words[i + 2]) == threeGram[word]):
+                result.append(threeGram[word])
 
-
-
-
-
-        if (isTerm):
-            result.append(word)
-#        elif (len(word) > 1):
-#            p1Result = re.match(p1Match, word)#all uppercase
-#            p2Result = re.findall(p2Contain, word)#contains 802.
-#            p3Result = hasCharDig(word)#contains at least one char and digit
-#            p4Result = re.findall('http', word)
-#            #print(word, " ", p1Result, " ", p2Result)
-#            if (p1Result is not None ) or len(p2Result) > 0 or p3Result:
-#                if len(p4Result) == 0:
-#                    result.append(word)
     #delete stopword
     stopWords = getStopWords()
     wordsFiltered = []
     for w in result:
         if w not in stopWords:
             wordsFiltered.append(w)
-    return wordsFiltered
+    appendList = []
+    if ("AB" in pattern):
+        for word in extractedAbb:
+            #prevent double adding abb
+            if not (word in wordsFiltered):
+                appendList.append(word)#should not use wordsFilteredList.append, or it will only record one
+    finalResult = wordsFiltered + appendList
+    print("num of technical terms got\t", len(finalResult))
+    return finalResult
+#def isTechTerms(word, techTermSet):
+#    return word
+##    for term in listOfTechTerm:
+##                #correct match
+##                if word == term:
+##                    isTerm = True
+##                splited_terms = term.split()
+##                
+##                #see if word is the phrase:
+##                if len(splited_terms) > 1:
+##                    isEqual = True
+##                    for idx in range(len(splited_terms)):
+##                        if (i + idx > wordNum - 1):
+##                            break
+##                        if (words[i + idx] != splited_terms[idx]):
+##                            isEqual = False
+##                    if (isEqual):
+##                        result.append(term)
+#def isAbbreviation(word, abbSet):
+##    return (word.upper() == word)#then all words that are numbers, will return true
+#    #1.len > 1;
+#    #2.num of upper case characters >= 1/2 len
+#    numChar = len(word)
+#    if (numChar <= 1):
+#        return False
+#    acc = 0
+#    for c in word:
+#        if (c.isupper()):
+#            acc+=1
+#    if (acc >= numChar / 2):
+#        return True
+#    return False
+    
 def hasCharDig(word):
 # =============================================================================
 #     #check whether a word has both digit and char
@@ -136,6 +157,7 @@ def getListOfTechTerms(dictAbb, *paths, isReset = False):
 # =============================================================================
     try:
         if (isReset):
+            print("reseting all technical terms")
             raise Exception("reseting")
         with open("techTerms.dat", "rb") as f:
             technicalWords = pickle.load(f)
@@ -144,6 +166,10 @@ def getListOfTechTerms(dictAbb, *paths, isReset = False):
         for path in paths:
             with open (path, 'rb') as fp:
                 technicalWords += pickle.load(fp)
+        #Strip
+        for i in range(len(technicalWords)):
+            technicalWords[i] = technicalWords[i].strip()
+        
         for k, v in dictAbb.items():
             technicalWords.append(k)
             technicalWords.append(v)
@@ -153,12 +179,12 @@ def getListOfTechTerms(dictAbb, *paths, isReset = False):
             if (len(word) > 1 and word.lower() != "ieee"):
                 
                 technicalWords.append(word)
-        
+#        print("finish newly loading technical terms list, with num of words:" + str(len(technicalWords)))
         with open("techTerms.dat", "wb") as f:
             pickle.dump(technicalWords, f)
             
     
-    print("finish loading technical terms list")
+#    print("finish loading technical terms list, with num of words:" + str(len(technicalWords)))
         
     return technicalWords
 
@@ -185,26 +211,7 @@ def getContent(textPath):
 
     wordsFiltered = words
     return wordsFiltered
-
-def wordListToFreqDict(wordList):
-# =============================================================================
-#     #transform a list of word to a dictionary whose key is word and value is the count of key occurring time in the list
-# =============================================================================
-    wordFreq = [wordList.count(p) for p in wordList]
-    return dict(zip(wordList, wordFreq))
-
-def getFreqDict(filePath, listOfTechTerms):
-# =============================================================================
-#     #given a file Path, extract all the tech terms in it according to listOfTechTerms
-#     #return a word-freq-dict
-# =============================================================================
-    wordsFiltered = getContent(filePath)
-    #print(wordsFiltered)
-
-    #listOfTechTerms.append("Recommended Practice")#just a test
-    potentialTechTerms = getTechTerms(wordsFiltered, listOfTechTerms)
-#    print(potentialTechTerms)
-    wordFreqDict = wordListToFreqDict(potentialTechTerms)
+    
     return wordFreqDict
 def getAllFiles(dirPath):
 # =============================================================================
@@ -225,48 +232,42 @@ def getAllFiles(dirPath):
     print("good file num: ",len(goodFiles))
     return goodFiles
 
-def getAllDicts(files, listOfTechTerms, numFile):
-# =============================================================================
-#     # get a list of dicts, each is the word-freq-dict of a file
-# =============================================================================
-    listOfDicts = []
-    count = 0
-    for file in files:
-        try:
-            print(count, "\t: ", file)
-            listOfDicts.append(getFreqDict(file, listOfTechTerms))
-            count += 1
-        except:
-            pass
-        if (count >= numFile):
-            break
 
-    return listOfDicts
-
-def getList(file, listOfTechTerms, dictAbb):
+def getList(file, oneGram, twoGram, threeGram, abb_all, abbSet, dictAbb, pattern = "AB"):
 # =============================================================================
 #     #get a list of word lists, each element is the word extracted from file from files
 #     #replace all the words  that occurring in key set of dictAbb by corresponding full titles
 # =============================================================================
     global numCount
-    listOfWords = []
 
-    try:
-        wordsFiltered = getContent(file)
-        techTerms = getTechTerms(wordsFiltered, listOfTechTerms)
-        for i in range(len(techTerms)):
-            abb = techTerms[i]
-            fullTitle = dictAbb.get(abb, None)
-            if fullTitle is not None:
-                techTerms[i] = fullTitle
-#                    print("changeing ", abb, " \t to ", fullTitle)
-            listOfWords.append(techTerms)
-        print(numCount, "\t", file)
-        numCount += 1
-            #here delete the duplicate one
-    except:
-        pass#if can't open the file then do nothing
-    return (listOfWords, file)
+    
+    wordsFiltered = getContent(file)
+    techTerms = getTechTerms(wordsFiltered, oneGram, twoGram, threeGram, abb_all[file.split("\\")[-1]], abbSet, pattern)
+#    for i in range(len(techTerms)):
+#        abb = techTerms[i]
+#        fullTitle = dictAbb.get(abb, None)
+#        if fullTitle is not None:
+#            techTerms[i] = fullTitle
+##                    print("changeing ", abb, " \t to ", fullTitle)
+#        listOfWords.append(techTerms)
+#    print(numCount, "\t", file)
+#    numCount += 1
+#    try:
+#        wordsFiltered = getContent(file)
+#        techTerms = getTechTerms(wordsFiltered, listOfTechTerms, pattern)
+#        for i in range(len(techTerms)):
+#            abb = techTerms[i]
+#            fullTitle = dictAbb.get(abb, None)
+#            if fullTitle is not None:
+#                techTerms[i] = fullTitle
+##                    print("changeing ", abb, " \t to ", fullTitle)
+#            listOfWords.append(techTerms)
+#        print(numCount, "\t", file)
+#        numCount += 1
+#            #here delete the duplicate one
+#    except:
+#        pass#if can't open the file then do nothing
+    return (techTerms, file.split("\\")[-1])
 
 
 def getDictOfAbb(*paths):
@@ -286,50 +287,62 @@ def getDictOfAbb(*paths):
 from itertools import product
 if __name__ == "__main__":
     #key paras
-    minCount = 5
-    numFile = 400;
-    
-    
+#    minCount = 1
+    numStart = 0
+    numEnd = 6000
+#    prefix = "AB"
+    prefix = "AB"
+#    prefix = "tech"    
+    if (prefix == "AB_tech"):
+        print("extracting both technical terms and abbreviation")
+    elif(prefix == "tech"):
+        print("extracting techincal terms")
+    else:
+        print("extractng abbreviation")
     #prepocessing
     dictAbb1 = getDictOfAbb(dictPath)
     #if put trus as third para, then it will reextract the tech terms from files
-    listOfTechTerms1 = getListOfTechTerms(dictAbb1, techTermPath, True)
+    listOfTechTerms1 = getListOfTechTerms(dictAbb1, techTermPath, True)#true means resetting
+    techTermSet1 = set(listOfTechTerms1)
+    
+    dictOfAbb = pickle.load(open(abbListPath, "rb"))
+    listOfAbb = []
+    for k, v in dictOfAbb.items():
+        listOfAbb = listOfAbb + v
+    
+    abbSet1 = set(listOfAbb)
     print("finish loading")
     #get all the files
     
-    fileNames = getSelectedFileNames(pdfDir, 0, numFile);
+    #loading all the paras for getListfunction
+    fileNames = getSelectedFileNames(pdfDir, numStart, numEnd);
+    oneGram = pickle.load(open("techTrem_oneGram_set.dat", "rb"))
+    twoGram = pickle.load(open("techTerm_twoGram_dict.dat", "rb"))
+    threeGram = pickle.load(open("techTerm_threeGram_dict.dat", "rb"))
+    abb_all = pickle.load(open("abb_of_all.dat", "rb"))
+    
     print("start parallal processing")
-    np = 16
+    np = 14
+    useAbbreviation = True#true means use both abbreviation and tech terms
     p = multiprocessing.Pool(np)
-    output = p.map(partial(getList, listOfTechTerms = listOfTechTerms1, dictAbb = dictAbb1),  [file for file in fileNames])
+    output = p.map(partial(getList, oneGram = oneGram, twoGram = twoGram, threeGram = threeGram, abbSet = abbSet1, abb_all = abb_all, dictAbb = dictAbb1, pattern = prefix),  [file for file in fileNames])
 #    print(len(output[0]))
-    listOfWordLists = []
+    listOfWordDict = {}
     computedFiles = []
     for out in output:
         if (len(out[0]) > 0):
-            listOfWordLists.append(out[0][0])
-            computedFiles.append(out[1])
-    print(listOfWordLists[0])
+            listOfWordDict[out[1]] = out[0]#each element in listOfWordLists is a tuple, whose first elem is fileName, second is the list of words
+#            computedFiles.append(out[1])
+#    print(listOfWordLists[0])
     print("number of files:", len(computedFiles))
     
-    
-    vec = CountVectorizer(min_df = minCount,tokenizer=lambda doc: doc, lowercase=False)
-    wordFreqArray = vec.fit_transform(listOfWordLists)
-#    listOfDicts = getAllDicts(fileNames, listOfTechTerms, numFile)
-#    vec = DictVectorizer()
-#    wordFreqArray = vec.fit_transform(listOfDicts)
-    featureName = vec.get_feature_names()
-#    print(wordFreqArray)
-#    print(featureName)
+    #calculate the word-freq-matrix
+#    vec = CountVectorizer(min_df = minCount,tokenizer=lambda doc: doc, lowercase=False)
+#    wordFreqArray = vec.fit_transform(listOfWordLists)
+#    featureName = vec.get_feature_names()
     
     #save key variables
-    keyWord = "file_" + str(numFile) + "_minDf_" + str(minCount) + "_"
-    pickle.dump(computedFiles, open(keyWord + "computedFiles.dat", "wb"))
-    pickle.dump(wordFreqArray, open(keyWord + "wordFreqArray.dat", "wb"))
-    pickle.dump(featureName, open(keyWord + "featureName.dat", "wb"))
-    pickle.dump(listOfWordLists, open(keyWord + "listOfWordLists.dat", "wb"))
-    
-    pickle.dump(computedFiles, open("computedFiles.dat", "wb"))
-    pickle.dump(wordFreqArray, open("wordFreqArray.dat", "wb"))
-    pickle.dump(featureName, open("featureName.dat", "wb"))
-    pickle.dump(listOfWordLists, open("listOfWordLists.dat", "wb"))
+
+    keyWord = prefix +"_" + str(len(listOfWordDict))+ "file_"
+    pickle.dump(listOfWordDict, open(keyWord + "wl_dict.dat", "wb"))
+    pickle.dump(listOfWordDict, open("wl_dict.dat", "wb"))

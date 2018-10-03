@@ -22,12 +22,28 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import HashingVectorizer 
 import pickle, json
 
+def trick(wordList):
+    newList = []
+    for word in wordList:
+        if (word == "IEEE"):
+            continue
+        newList.append(word)
+    return newList
 
 if __name__ == "__main__":
  
 #    filePath = "listOfWordLists.dat"
 #    fileNames = pickle.load(open(fileNamesPath, "rb"))  
-    wordListsPath = "Abbreviation_from_files.dat"
+    
+#    wordListsPath = "listOfWordDicts.dat"
+    
+    #use both 
+    collection = "useBoth_"
+    wordListsPath = "file_400_minDf_1_useAB_listOfWordDicts.dat"
+    
+    
+#    collection  = "onlyAbb_"
+#    wordListsPath = "Abbreviation_from_files_400.dat"
 #    wordListsPath = "Abbreviation_from_files_1000.dat"
 #    wordListsPath = "Abbreviation_from_files_All.dat"
 #    fileNamesPath = "computedFiles.dat"
@@ -58,7 +74,7 @@ if __name__ == "__main__":
     import lda
     import lda.datasets
     numTopic = 10
-    numIter = 2000
+    numIter = 500
     model = lda.LDA(n_topics= numTopic, n_iter= numIter, random_state=1)
     model.fit(np.asarray(weight))     # model.fit_transform(X) is also available
     topic_word = model.topic_word_    # model.components_ also works
@@ -86,7 +102,9 @@ if __name__ == "__main__":
     print(labelMap)
     # one result: {1: 176, 4: 104, 2: 55, 0: 93, 3: 70}
     #write the label to file
-    prefix = str(X.shape[0]) + "file_" + str(X.shape[1]) + "word_" + str(minCount) + "mindf_" + str(numTopic) + "topic_" + str(numIter) + "iter_"
+    import datetime
+    date = datetime.datetime.now()
+    prefix = collection + str(date.month) + str(date.day) + "date_" + str(X.shape[0]) + "file_" + str(X.shape[1]) + "word_" + str(minCount) + "mindf_" + str(numTopic) + "topic_" + str(numIter) + "iter_"
     with open(prefix + "model.dat", "wb" ) as f:
         pickle.dump(model, f)
     with open(prefix + "labels.txt", "w" ) as f:
@@ -96,7 +114,7 @@ if __name__ == "__main__":
             f.write("%s\t:%s\n" %(file, item))
     #write down a dictionary, whose key is the topic index, value is the list of files 
     #classified into this topic
-    with open(prefix + "labels2.txt", "w") as f:
+    with open(prefix + "filesInDiffTopics.txt", "w") as f:
         tempDict = {}
         for i in range(numTopic):
             tempDict[i] = []
@@ -104,10 +122,18 @@ if __name__ == "__main__":
             item = labels[i]
             file = fileNames[i]
             tempDict[item].append(file)
-        json.dump(tempDict, f)
-        f.write("\n")
-        for k, v in labelMap.items():
-            f.write(str(k) + "\t" + str(v) + "\n")
+            
+        with open(prefix + "dict_topic_files.dat", "wb") as d:
+            pickle.dump(tempDict, d)
+#        json.dump(tempDict, f)
+        for k, l in tempDict.items():
+            f.write(str(k) + "\t:" + str(labelMap[k]) + "\n")
+            for elem in l:
+                f.write(str(elem) + "\n")
+            f.write("\n")
+#        f.write("\n")
+#        for k, v in labelMap.items():
+#            f.write(str(k) + "\t" + str(v) + "\n")
     #match the label to document name
     
     
@@ -136,10 +162,18 @@ if __name__ == "__main__":
     for i in range(len(tempDict)):
         featureNames.append(tempDict[i])
 #    print(featureNames)
-    with open(prefix + "topic_word.txt", "w") as f:
+    with open(prefix + "topic_word.txt", "w" , errors= "ignore") as f:
+        tempDict = {}
         for i, topic_dist in enumerate(topic_word):
             topic_words = np.array(featureNames)[np.argsort(topic_dist)][:-(numTopic+5):-1]
-            f.write('*Topic {}\n- {}\n'.format(i, ','.join(topic_words)))
+            tempDict[i] = topic_words
+            topic_words = trick(topic_words)
+            lineContent = '*Topic {}\n- {}\n'.format(i, ','.join(topic_words))
+            f.write(lineContent)
+            print(lineContent)
+        with open(prefix + "dict_topic_wordList.dat", "wb") as d:
+            pickle.dump(tempDict, d)
+        
     
 
 

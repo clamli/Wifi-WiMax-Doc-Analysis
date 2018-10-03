@@ -59,6 +59,7 @@ def getAllFiles(dirPath, storeName = "allFileName.dat"):
     try:
         with open(storeName, "rb") as f:
             selectedFiles = pickle.load(f)
+        print("loading previous all file Names")
         return selectedFiles
     except:            
         files = [os.path.join(dirPath, f) for f in os.listdir(dirPath)]
@@ -95,5 +96,6 @@ def getSelectedFileNames(pdfDir, start, end, storeName = "randomIdx.dat"):
     for idx in fileIdxWanted:
         selectedFiles.append(fileNames[idx])
     
-        
+    #make sure not exceed
+    end = min(end, len(selectedFiles))
     return selectedFiles[start:end]#[start,start + 1, xxx, end- 1]
