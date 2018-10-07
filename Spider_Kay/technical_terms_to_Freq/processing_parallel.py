@@ -16,13 +16,20 @@ from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_extraction.text import CountVectorizer
 from functools import partial
 
+pdfDir11_1 = "F:\\WireLessNLPGRA\\gitFiles\\Wifi-WiMax-Doc-Analysis\\Spider_Kay\\80211grouper"
+pdfDir11_2 = "F:\\WireLessNLPGRA\\gitFiles\\Wifi-WiMax-Doc-Analysis\\Spider_Kay\\80211mentor"
+pdfDir16_1 = "F:\\WireLessNLPGRA\\gitFiles\\Wifi-WiMax-Doc-Analysis\\Spider_Kay\\80216mentor"
+
+
 #path1 = "F:\\WireLessNLPGRA\\code\\NamedEntityRecognition\\some_proposal\\C802162a-01_01.pdf"
 #path2 = "F:\\WireLessNLPGRA\\code\\NamedEntityRecognition\\some_proposal\\C802162a-01_06.pdf"
 techTermPath = "words"
 abbListPath = "Abbreviation_from_files_1000_by.dat"
 dictPath = "dict"
-pdfDir =  "F:\\WireLessNLPGRA\\80216CompProj"#change this to the pdf folders
+#pdfDir =  "F:\\WireLessNLPGRA\\80216CompProj"#change this to the pdf folders
 numCount = 0
+
+pdfDir =  pdfDir11_1
 from fileProcessing import *
 from techTermProcessing import *
 
@@ -62,7 +69,11 @@ def transform(word):
         word = word.lower()
     return word
 
+from nltk.corpus import words
+english = words.words()
+english = [word.lower() for word in english]
 def getTechTerms(words, oneGram, twoGram, threeGram, extractedAbb, abbSet, pattern = "AB"):
+    global english
 # =============================================================================
 #     #given a list of words from a doc, and a list of tecnical terms, find all occurance of technical word
 # =============================================================================
@@ -94,13 +105,40 @@ def getTechTerms(words, oneGram, twoGram, threeGram, extractedAbb, abbSet, patte
             wordsFiltered.append(w)
     appendList = []
     if ("AB" in pattern):
-        for word in extractedAbb:
-            #prevent double adding abb
-            if not (word in wordsFiltered):
-                appendList.append(word)#should not use wordsFilteredList.append, or it will only record one
+        if (len(extractedAbb) > 0):
+            for word in extractedAbb:
+                #prevent double adding abb
+                if not (word in wordsFiltered):
+                    appendList.append(word)#should not use wordsFilteredList.append, or it will only record one
+#        else:
+#            setFilterd = set(wordsFiltered)
+#            for word in words:
+#                if (word not in setFilterd and word.isalpha() and len(word)> 1):
+#                    if not isAbbrev(word) and word.lower() not in english:
+#                        appendList.append(word)
     finalResult = wordsFiltered + appendList
     print("num of technical terms got\t", len(finalResult))
     return finalResult
+
+def moreThanOneUpper(word):
+    accum = 0
+    for ch in word:
+        if ch.isupper():
+            accum += 1
+            if accum > 1:
+                return True
+    return False
+
+def isAbbrev(word):
+    if word.isupper() or moreThanOneUpper(word):
+        return True
+    return False
+
+def notInWords(word):
+    for pott in words_tec:
+        if word in pott:
+            return False
+    return True
 #def isTechTerms(word, techTermSet):
 #    return word
 ##    for term in listOfTechTerm:
@@ -212,25 +250,7 @@ def getContent(textPath):
     wordsFiltered = words
     return wordsFiltered
     
-    return wordFreqDict
-def getAllFiles(dirPath):
-# =============================================================================
-#     #get all the pdf files in the folder, only those can be parsed
-# =============================================================================
-    files = [os.path.join(dirPath, f) for f in os.listdir(dirPath)]
 
-    files = list(filter(lambda f: f.endswith(('.pdf', '. PDF')), files))
-    print("total number of pdf files under directory: ", len(files))
-    goodFiles = []
-    for file in files:
-        try:
-            doc = fitz.open(file)
-        except:
-            pass
-        else:
-            goodFiles.append(file)
-    print("good file num: ",len(goodFiles))
-    return goodFiles
 
 
 def getList(file, oneGram, twoGram, threeGram, abb_all, abbSet, dictAbb, pattern = "AB"):
@@ -242,7 +262,7 @@ def getList(file, oneGram, twoGram, threeGram, abb_all, abbSet, dictAbb, pattern
 
     
     wordsFiltered = getContent(file)
-    techTerms = getTechTerms(wordsFiltered, oneGram, twoGram, threeGram, abb_all[file.split("\\")[-1]], abbSet, pattern)
+    techTerms = getTechTerms(wordsFiltered, oneGram, twoGram, threeGram, abb_all.get(file.split("\\")[-1], []), abbSet, pattern)
 #    for i in range(len(techTerms)):
 #        abb = techTerms[i]
 #        fullTitle = dictAbb.get(abb, None)
@@ -289,9 +309,9 @@ if __name__ == "__main__":
     #key paras
 #    minCount = 1
     numStart = 0
-    numEnd = 6000
+    numEnd = 2000
 #    prefix = "AB"
-    prefix = "AB"
+    prefix = "tech_AB"
 #    prefix = "tech"    
     if (prefix == "AB_tech"):
         print("extracting both technical terms and abbreviation")
@@ -315,11 +335,12 @@ if __name__ == "__main__":
     #get all the files
     
     #loading all the paras for getListfunction
-    fileNames = getSelectedFileNames(pdfDir, numStart, numEnd);
+    fileNames = getSelectedFileNames(pdfDir, numStart, numEnd, pdfDir.split("\\")[-1] + "randomIdx.dat");
     oneGram = pickle.load(open("techTrem_oneGram_set.dat", "rb"))
     twoGram = pickle.load(open("techTerm_twoGram_dict.dat", "rb"))
     threeGram = pickle.load(open("techTerm_threeGram_dict.dat", "rb"))
-    abb_all = pickle.load(open("abb_of_all.dat", "rb"))
+    abb_all = pickle.load(open("80211grouper_AB_1393file_wl_dict.dat", "rb"))
+    
     
     print("start parallal processing")
     np = 14
@@ -343,6 +364,6 @@ if __name__ == "__main__":
     
     #save key variables
 
-    keyWord = prefix +"_" + str(len(listOfWordDict))+ "file_"
+    keyWord = pdfDir.split("\\")[-1] +  "_" + prefix +"_" + str(len(listOfWordDict))+ "file_"
     pickle.dump(listOfWordDict, open(keyWord + "wl_dict.dat", "wb"))
     pickle.dump(listOfWordDict, open("wl_dict.dat", "wb"))

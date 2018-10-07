@@ -54,7 +54,9 @@ def getContent(textPath):
     wordsFiltered = words
     return wordsFiltered
 
-def getAllFiles(dirPath, storeName = "allFileName.dat"):
+#def getAllFiles(dirPath, storeName = "allFileName.dat"):
+def getAllFiles(dirPath):
+    storeName = dirPath.split("\\")[-1] + "Filename.dat"
 #    print(os.listdir(dirPath))
     try:
         with open(storeName, "rb") as f:
