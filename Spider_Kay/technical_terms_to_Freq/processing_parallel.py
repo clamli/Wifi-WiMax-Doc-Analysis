@@ -15,6 +15,7 @@ import string
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_extraction.text import CountVectorizer
 from functools import partial
+import warnings
 
 pdfDir11_1 = "F:\\WireLessNLPGRA\\gitFiles\\Wifi-WiMax-Doc-Analysis\\Spider_Kay\\80211grouper"
 pdfDir11_2 = "F:\\WireLessNLPGRA\\gitFiles\\Wifi-WiMax-Doc-Analysis\\Spider_Kay\\80211mentor"
@@ -26,8 +27,17 @@ pdfDir16_1 = "F:\\WireLessNLPGRA\\gitFiles\\Wifi-WiMax-Doc-Analysis\\Spider_Kay\
 techTermPath = "words"
 abbListPath = "Abbreviation_from_files_1000_by.dat"
 dictPath = "dict"
+fileNamesPath = ""
+abbWLDictPath = "80211grouper_AB_1393file_wl_dict.dat"
 #pdfDir =  "F:\\WireLessNLPGRA\\80216CompProj"#change this to the pdf folders
 numCount = 0
+setting = {"80211mentor":{
+        "fileName":"80211mentorIncludedFileNames.dat",
+        "abbWLDict": "80211mentorIncludedAbbWLDict.dat",
+        "fileDir": "F:\\WireLessNLPGRA\\gitFiles\\Wifi-WiMax-Doc-Analysis\\Spider_Kay\\80211mentor"
+        }
+            
+    }
 
 pdfDir =  pdfDir11_1
 from fileProcessing import *
@@ -226,20 +236,49 @@ def getListOfTechTerms(dictAbb, *paths, isReset = False):
         
     return technicalWords
 
+from pptx import Presentation
+import docx2txt
 def getContent(textPath):
 # =============================================================================
 # #    input is the path of pdf file, return all of the words(segemented by \s \n)
 # #    remove all punctuation
 # =============================================================================
-    content = getPage(textPath)
-    text1 = '.'.join(content)
-
-    #words = nltk.word_tokenize(text1)
-    sents = sent_tokenize(text1)
     words = []
-    #delete punctuation
-    for sent in sents:
-        words += [word.strip(string.punctuation) for word in re.split(r'\s|\n', sent)]
+    if (textPath.endswith(".pdf")):
+        
+        content = getPage(textPath)
+        text1 = '.'.join(content)
+    
+        #words = nltk.word_tokenize(text1)
+        sents = sent_tokenize(text1)
+        #delete punctuation
+        for sent in sents:
+            ws = [word.strip(string.punctuation) for word in re.split(r'\s|\n', sent)]
+            ws = [w for w in ws if len(w) > 1]
+            words += ws
+    if (textPath.endswith(".doc") or textPath.endswith(".docx")):
+        text = docx2txt.process(textPath)
+        sents = re.split("\\n+|\\t+|\.+", text)
+        for sent in sents:
+            if (sent is None ): continue
+            ws =  [word.strip(string.punctuation) for word in re.split(r'\s|\n', sent)]
+            ws = [w for w in ws if len(w) > 1]
+            words+=ws
+    if (textPath.endswith(".ppt") or textPath.endswith(".pptx")):
+        #python pptx  is good at extracting content in pptx, but ppt is not ok
+        sents = []
+        prs = Presentation(textPath)
+        for slide in prs.slides:
+            for shape in slide.shapes:
+                if not shape.has_text_frame:
+                    continue
+                for paragraph in shape.text_frame.paragraphs:
+                    for run in paragraph.runs:
+                        sents.append(run.text)
+        for sent in sents:
+            ws =  [word.strip(string.punctuation) for word in re.split(r'\s|\n', sent)]
+            ws = [w for w in ws if len(w) > 1]
+            words += ws
     #delete stopword
 #     stopWords = set(stopwords.words('english'))
 #     wordsFiltered = []
@@ -247,13 +286,22 @@ def getContent(textPath):
 #        if w not in stopWords:
 #            wordsFiltered.append(w)
 
-    wordsFiltered = words
+    wordsFiltered = [lowerlize(word) for word in words]
+    wordsFiltered = [word for word in wordsFiltered if word is not None]
     return wordsFiltered
-    
+def lowerlize(word):
+    try:
+            
+        if (word[0].isupper() and word != word.upper()):
+            return word.lower()
+        else:
+            return word
+    except:
+        return None
 
 
 
-def getList(file, oneGram, twoGram, threeGram, abb_all, abbSet, dictAbb, pattern = "AB"):
+def getList(file, fileDir, oneGram, twoGram, threeGram, abb_all, abbSet, dictAbb, pattern = "AB"):
 # =============================================================================
 #     #get a list of word lists, each element is the word extracted from file from files
 #     #replace all the words  that occurring in key set of dictAbb by corresponding full titles
@@ -261,7 +309,7 @@ def getList(file, oneGram, twoGram, threeGram, abb_all, abbSet, dictAbb, pattern
     global numCount
 
     
-    wordsFiltered = getContent(file)
+    wordsFiltered = getContent(os.path.join(fileDir, file))
     techTerms = getTechTerms(wordsFiltered, oneGram, twoGram, threeGram, abb_all.get(file.split("\\")[-1], []), abbSet, pattern)
 #    for i in range(len(techTerms)):
 #        abb = techTerms[i]
@@ -306,10 +354,11 @@ def getDictOfAbb(*paths):
     return dictAbb
 from itertools import product
 if __name__ == "__main__":
+    warnings.filterwarnings("ignore")
     #key paras
 #    minCount = 1
-    numStart = 0
-    numEnd = 2000
+#    numStart = 0
+#    numEnd = 2000
 #    prefix = "AB"
     prefix = "tech_AB"
 #    prefix = "tech"    
@@ -335,18 +384,19 @@ if __name__ == "__main__":
     #get all the files
     
     #loading all the paras for getListfunction
-    fileNames = getSelectedFileNames(pdfDir, numStart, numEnd, pdfDir.split("\\")[-1] + "randomIdx.dat");
+#    fileNames = getSelectedFileNames(pdfDir, numStart, numEnd, pdfDir.split("\\")[-1] + "randomIdx.dat");
+    fileNames = pickle.load(open(fileNamesPath, "rb"))
     oneGram = pickle.load(open("techTrem_oneGram_set.dat", "rb"))
     twoGram = pickle.load(open("techTerm_twoGram_dict.dat", "rb"))
     threeGram = pickle.load(open("techTerm_threeGram_dict.dat", "rb"))
-    abb_all = pickle.load(open("80211grouper_AB_1393file_wl_dict.dat", "rb"))
+    abb_all = pickle.load(open(abbWLDictPath, "rb"))
     
     
     print("start parallal processing")
     np = 14
     useAbbreviation = True#true means use both abbreviation and tech terms
     p = multiprocessing.Pool(np)
-    output = p.map(partial(getList, oneGram = oneGram, twoGram = twoGram, threeGram = threeGram, abbSet = abbSet1, abb_all = abb_all, dictAbb = dictAbb1, pattern = prefix),  [file for file in fileNames])
+    output = p.map(partial(getList, pdfDir = pdfDir, oneGram = oneGram, twoGram = twoGram, threeGram = threeGram, abbSet = abbSet1, abb_all = abb_all, dictAbb = dictAbb1, pattern = prefix),  [file for file in fileNames])
 #    print(len(output[0]))
     listOfWordDict = {}
     computedFiles = []

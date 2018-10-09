@@ -56,6 +56,7 @@ def getContent(textPath):
 
 #def getAllFiles(dirPath, storeName = "allFileName.dat"):
 def getAllFiles(dirPath):
+    #get all the fileNames (relative path)
     storeName = dirPath.split("\\")[-1] + "Filename.dat"
 #    print(os.listdir(dirPath))
     try:
@@ -64,7 +65,8 @@ def getAllFiles(dirPath):
         print("loading previous all file Names")
         return selectedFiles
     except:            
-        files = [os.path.join(dirPath, f) for f in os.listdir(dirPath)]
+#        files = [os.path.join(dirPath, f) for f in os.listdir(dirPath)]
+        files = [f for f in os.listdir(dirPath)]
         
         files = list(filter(lambda f: f.endswith(('.pdf', '. PDF')), files))
         print("total number of pdf files under directory: ", len(files))
